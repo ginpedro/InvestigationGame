@@ -6,53 +6,63 @@ public class PlayerController : MonoBehaviour {
 	public float maxspeedX = 8f;
 	public float maxspeedY = 4f;
 	public Animator ani;
-	public float jump_height = 50f;
-	
-	Vector3 sc;
-	bool face_to_right = true;
+
+	float dirX;
+	float dirY;
 	
 	// Use this for initialization
 	void Start () {
 		
 		ani = this.GetComponent<Animator> ();
-		//ani.SetBool("jumping", false);
+		dirX = ani.GetFloat("dirX");
+		dirY = ani.GetFloat("dirY");
+		ani.SetBool("running", false);
 	}
 	
 	// Update is called once per frame
 	void Update () {
 		
-		//movimentacao esquerda-direita
+		//movimentacao nas oito direcoes
 		float velx = 0f;
 		float vely = 0f;
-		
+		bool hor = false;
+		bool ver = false;
 		if (Input.GetKey(KeyCode.RightArrow)) {
-			velx = maxspeedX;
-			if (!face_to_right) {
-				sc = transform.localScale;
-				sc.x *= -1.0f;
-				face_to_right = true;
-				transform.localScale = sc;
-			}
+			velx = 1f;
+			dirX = 1f;
+			hor = true;
 		}
 		if (Input.GetKey(KeyCode.LeftArrow)) {
-			velx = -maxspeedX;
-			if (face_to_right) {
-				sc = transform.localScale;
-				sc.x *= -1.0f;
-				face_to_right = false;
-				transform.localScale = sc;
-			}
+			velx = -1f;
+			dirX = -1f;
+			hor = true;
 		}
 		if (Input.GetKey(KeyCode.UpArrow)) {
-			vely = maxspeedY;
+			vely = 1f;
+			dirY = 1f;
+			ver = true;
 		}
 		if (Input.GetKey(KeyCode.DownArrow)) {
-			vely = -maxspeedY;
+			vely = -1f;
+			dirY = -1f;
+			ver = true;
 		}
 
-		float spd = Mathf.Abs(velx) + Mathf.Abs(vely);
-		ani.SetFloat("speed", Mathf.Abs(spd));
-		rigidbody2D.velocity = new Vector2 ( velx, vely );
+		ani.SetBool("running", (hor || ver));
+		ani.SetFloat("speedX", velx);
+		ani.SetFloat("speedY", vely);
+		if (hor && !ver) {
+			ani.SetFloat("dirX", dirX);
+			ani.SetFloat("dirY", 0f);
+		}
+		else if (!hor && ver) {
+			ani.SetFloat("dirX", 0f);
+			ani.SetFloat("dirY", dirY);
+		}
+		else if (hor && ver) {
+			ani.SetFloat("dirX", dirX);
+			ani.SetFloat("dirY", dirY);
+		}
+		rigidbody2D.velocity = new Vector2 ( velx*maxspeedX, vely*maxspeedY );
 	}
-	
 }
